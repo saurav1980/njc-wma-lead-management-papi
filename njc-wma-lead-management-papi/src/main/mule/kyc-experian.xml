@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	
+	<flow name="kyc-experianFlow" doc:id="57d1b645-4908-4c52-a25c-1f8e2698a812" >
+		<set-variable value="#[payload.id]" doc:name="Lead Id" doc:id="ae3afbbf-6434-4882-992f-801251035130" variableName="leadId"/>
+		<logger level="INFO" doc:name="Logger" doc:id="bd636400-21f1-48c0-85e8-f8e4cf7783fa" message="#[vars.leadId]"/>
+		<ee:transform doc:name="Transform Message" doc:id="c431794d-6b04-4eae-9ed7-c9f303a114fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"header": {
+		"tenantId": "c7f8f55045884847b993d81ca8cdaf",
+		"requestType": "UKCCIS-Devportal",
+		"clientReferenceId": "TEST-123-124",
+		"expRequestId": "",
+		"messageTime": "2022-05-19T16:01:53.0000000+00:00",
+		"txnId": "",
+		"time": "",
+		"options": {
+		}
+	},
+	"payload": {
+		"control": [{
+			"option": "KYC_CLIENTTIERVERSION",
+			"value": "version1"
+		}],
+		"contacts": [{
+			"id": "MAINCONTACT_1",
+			"person": {
+				"personDetails": {
+					"dateOfBirth": "1969-01-25"
+				},
+				"typeOfPerson": "APPLICANT",
+				"personIdentifier": "P12345",
+				"names": [{
+					"id": "MAINPERSONNAME_1",
+					"type": "CURRENT",
+					"title": payload.salutation,
+					"firstName": payload.firstName,
+					"middleNames": payload.middleName,
+					"initials": "",
+					"surName": payload.lastName,
+					"namePrefix": "",
+					"nameSuffix": ""
+				}]
+			},
+			"addresses": [{
+				"id": "MAINAPPADDRESS_1",
+				"addressIdentifier": "ADDRESS_1",
+				"indicator": "RESIDENTIAL",
+				"addressType": "CURRENT",
+				"poBoxNumber": "",
+				"subBuilding": "",
+				"buildingName": "",
+				"buildingNumber": "1A",
+				"street": payload.street,
+				"street2": "",
+				"subLocality": "",
+				"locality": "",
+				"postTown": payload.city,
+				"county": "ABERDEENSHIRE",
+				"postal": payload.postalCode,
+				"stateProvinceCode": "",
+				"countryCode": "GBR",
+				"residentFrom": {
+					"fullDateFrom": "2019-01-01",
+					"yearFrom": "2019",
+					"monthFrom": "01",
+					"dayFrom": "01"
+				},
+				"residentTo": {
+					"fullDateTo": "2020-01-01",
+					"yearTo": "2020",
+					"monthTo": "01",
+					"dayTo": "01"
+				},
+				"timeAtAddress": {
+					"value": "365",
+					"unit": "DAYS"
+				}
+			}]
+		}],
+		"application": {
+			"applicants": [{
+				"id": "APPLICANT_1",
+				"contactId": "MAINCONTACT_1",
+				"type": "INDIVIDUAL",
+				"applicantType": "APPLICANT",
+				"consent": true,
+				"knownCustomer": true
+			}]
+		}
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="ExperianKYC" doc:id="8fd3fea7-095f-44a2-a751-e79e571beceb" config-ref="HTTP_Request_configuration_experian" path="${experianSapi.resources.verifyKYC}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b81aed2a-15bf-40da-ab02-7cf173bce2c9" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="d9113ad4-c726-4bb3-b869-e2faa66d8114" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+decision: payload.overallResponse default "STOP",
+creditScore: payload.creditScore as String default "500",
+
+address:{
+	street: payload.address.street,
+	city: payload.address.city,
+	postal: payload.address.postal,
+	countryCode: payload.address.countryCode
+}
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="cdd7fc2a-78b3-4d62-baf4-f538474156b9" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="629fa670-7b07-475d-b6fc-9f73dba2ff04" >
+			<when expression='#[((payload.decision=="CONTINUE") or (payload.decision=="ACCEPT")) and ((payload.address.city == "london"))]'>
+				<ee:transform doc:name="Transform Message" doc:id="26027f3f-d36f-41ff-8507-4356f301860b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+
+{
+    "kyc": "Cleared",
+	"IDCheck": "Cleared",
+	"AddressCheck": "Cleared",
+	"CreditScore" :  payload.creditScore as String default "600"
+
+}
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[((payload.decision=="CONTINUE") or (payload.decision=="ACCEPT")) and ((payload.address.city != "london"))]'>
+				<ee:transform doc:name="Transform Message" doc:id="7fdb5ad5-0a96-4476-b4b2-7839218c0cee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+{
+    "kyc": "Cleared",
+	"IDCheck": "Cleared",
+	"AddressCheck": "Issue",
+	"CreditScore" :  payload.creditScore as String default "500"
+
+}
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="3249f4ab-2a7d-4b2e-a791-e2472100c0ed" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	kyc: "Issue",
+	IDCheck: "Issue",
+	AddressCheck: "Issue",
+	CreditScore : payload.creditScore default 500
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<http:request method="PUT" doc:name="SalesforceSAPI" doc:id="2958bfae-348d-429c-b061-edfb763ae01f" config-ref="HTTP_Request_configuration_SalesforceSAPI" path="${salesforceCloudSapi.resources.updateLead}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"id" : vars.leadId
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="a68864f1-8904-440f-b9cb-284e45f02bb2" message="#[payload]" />
+	</flow>
+</mule>

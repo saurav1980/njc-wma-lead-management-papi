@@ -1,0 +1,94 @@
+{
+    "header": {
+        "tenantId": "c7f8f55045884847b993d81ca8cdaf",
+        "requestType": "UKCCIS-Devportal",
+        "clientReferenceId": "TEST-123-124",
+        "expRequestId": "",
+        "messageTime": "2022-05-19T16:01:53.0000000+00:00",
+        "txnId": "",
+        "time": "",
+        "options": {}
+    },
+    "payload": {
+        "control": [
+            {
+                "option": "KYC_CLIENTTIERVERSION",
+                "value": "version1"
+            }
+        ],
+        "contacts": [
+            {
+                "id": "MAINCONTACT_1",
+                "person": {
+                    "personDetails": {
+                        "dateOfBirth": "1969-01-25"
+                    },
+                    "typeOfPerson": "APPLICANT",
+                    "personIdentifier": "P12345",
+                    "names": [
+                        {
+                            "id": "MAINPERSONNAME_1",
+                            "type": "CURRENT",
+                            "title": "MR",
+                            "firstName": "NEIL",
+                            "middleNames": "",
+                            "initials": "",
+                            "surName": "CATHPOLE",
+                            "namePrefix": "",
+                            "nameSuffix": ""
+                        }
+                    ]
+                },
+                "addresses": [
+                    {
+                        "id": "MAINAPPADDRESS_1",
+                        "addressIdentifier": "ADDRESS_1",
+                        "indicator": "RESIDENTIAL",
+                        "addressType": "CURRENT",
+                        "poBoxNumber": "",
+                        "subBuilding": "",
+                        "buildingName": "",
+                        "buildingNumber": "1A",
+                        "street": "GEORGE SQUAR",
+                        "street2": "",
+                        "subLocality": "",
+                        "locality": "",
+                        "postTown": "INVERURI",
+                        "county": "ABERDEENSHIRE",
+                        "postal": "AB51 3XX",
+                        "stateProvinceCode": "",
+                        "countryCode": "GBR",
+                        "residentFrom": {
+                            "fullDateFrom": "2019-01-01",
+                            "yearFrom": "2019",
+                            "monthFrom": "01",
+                            "dayFrom": "01"
+                        },
+                        "residentTo": {
+                            "fullDateTo": "2020-01-01",
+                            "yearTo": "2020",
+                            "monthTo": "01",
+                            "dayTo": "01"
+                        },
+                        "timeAtAddress": {
+                            "value": "365",
+                            "unit": "DAYS"
+                        }
+                    }
+                ]
+            }
+        ],
+        "application": {
+            "applicants": [
+                {
+                    "id": "APPLICANT_1",
+                    "contactId": "MAINCONTACT_1",
+                    "type": "INDIVIDUAL",
+                    "applicantType": "APPLICANT",
+                    "consent": true,
+                    "knownCustomer": true
+                }
+            ]
+        }
+    }
+}

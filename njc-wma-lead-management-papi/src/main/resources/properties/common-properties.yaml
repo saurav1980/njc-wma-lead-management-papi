@@ -1,0 +1,19 @@
+http:
+  port: "8081"
+  protocol: "http"
+  basePath: "/"
+  
+
+salesforceCloudSapi:
+  host: "njc-wma-salesforce-sapi.us-e2.cloudhub.io"
+  path: ""
+  protocol: "HTTP"
+  resources:
+    updateLead: "/kyc/{id}"
+
+experianSapi:
+  host: "njc-wma-experiankyc-sapi.us-e2.cloudhub.io"
+  path: ""
+  protocol: "HTTP"
+  resources:
+    verifyKYC: "/kyc"

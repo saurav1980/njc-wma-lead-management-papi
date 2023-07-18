@@ -1,0 +1,16 @@
+http:
+  protocol: "http"
+  basePath: "/"
+  
+
+salesforceCloudSapi:
+  host: ""
+  path: ""
+  resources:
+    updateLead: "/kyc/{id}"
+
+experianSapi:
+  host: ""
+  path: ""
+  resources:
+    updateLead: "/kyc"
